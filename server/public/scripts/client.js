@@ -1,61 +1,43 @@
-$(document).ready(onReady);
+const app = angular.module('songsApp', []);
 
-function onReady(){
-  console.log('Hello');
-  getAllSongs();
+const songController = app.controller('SongController', ['$http', function($http){
+  let self = this;
 
-  $('#btn-add').on('click', function(event){
-    event.preventDefault();
-    let song = getNewSong();
-    addSong(song);
-  })
+  self.newSong = {};
 
-  function getAllSongs() {
-    $.ajax({
-      type: 'GET',
+  self.songsArray = {};
+
+  self.getAllSongs = function() {
+    $http({
+      method: 'GET',
       url: '/songs'
     })
-    .done(function(response){
-      console.log('Getting all songs:', response);
-      displaySongs(response);
+    .then(function(response){
+      console.log('Getting all songs:', response.data);
+      self.songsArray = response.data;
     })
-    .fail(function(error){
+    .catch(function(error){
       console.log(error);
     })   
-  }
+  } // end getAllSongs
 
-  function getNewSong() {
-    const song = {
-      track: $('#in-track').val(),
-      artist: $('#in-artist').val(),
-      published: $('#in-date').val(),
-      rank: $('#in-rank').val(),
-    }
-    return song;
-  }
+  self.getAllSongs();
 
-  function clearAddForm() {
-    $('#in-track').val('');
-    $('#in-artist').val('');
-    $('#in-date').val('');
-    $('#in-rank').val('');
-  }
-
-  function addSong(song) {
-    $.ajax({
-      type: 'POST',
+  self.addSong = function(newSong) {
+    $http({
+      method: 'POST',
       url: '/songs/add',
-      data: song
+      data: self.newSong
     })
-    .done(function(response){
-      console.log('Added song:', song);
-      clearAddForm();
-      getAllSongs();
+    .then(function(response){
+      console.log('Added song:', newSong);
+      newSong = {};
+      self.getAllSongs();
     })
-    .fail(function(error){
+    .catch(function(error){
       console.log(error);
     })
-  }
+  } // end addSong
 
   function updateSongRating(id, newRating) {
     $.ajax({
@@ -102,4 +84,5 @@ function onReady(){
     }
     return result;
   }
-}
+
+}]); // end controller
